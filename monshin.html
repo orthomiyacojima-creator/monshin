@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>問診票 | ○○整骨院</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --teal:#1D9E75;--teal-l:#E1F5EE;--teal-b:#5DCAA5;--teal-d:#085041;
+  --coral:#D85A30;--coral-l:#FAECE7;
+  --purple:#3C3489;--purple-l:#EEEDFE;--purple-b:#AFA9EC;
+  --text:#1a1a18;--muted:#888780;--border:rgba(0,0,0,0.12);
+  --bg:#f7f6f3;--surface:#fff;--surface2:#f0efe9;
+  --r:10px;--rp:20px;
+}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+header{background:var(--teal);padding:16px 20px;text-align:center;}
+header h1{font-size:15px;font-weight:700;color:#fff;}
+header p{font-size:11px;color:#9FE1CB;margin-top:3px;}
+.container{max-width:480px;margin:0 auto;padding:20px 16px 60px;}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;margin-bottom:16px;}
+.progress-fill{height:4px;background:var(--teal);border-radius:2px;transition:width 0.3s;}
+.step-counter{font-size:11px;color:var(--muted);margin-bottom:20px;}
+.step{display:none;}
+.step.active{display:block;}
+.step-label{font-size:11px;color:var(--teal);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;font-weight:500;}
+.step-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:20px;line-height:1.4;}
+.field{margin-bottom:18px;}
+.field-label{font-size:13px;color:var(--muted);margin-bottom:7px;display:block;}
+.field-label .req{color:var(--coral);}
+input[type=text],input[type=email],input[type=tel],input[type=password],select,textarea{
+  width:100%;font-size:15px;font-family:inherit;padding:12px 14px;
+  border-radius:var(--r);border:1px solid var(--border);
+  background:var(--surface);color:var(--text);outline:none;
+  transition:border-color 0.15s;-webkit-appearance:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--teal);}
+textarea{resize:vertical;min-height:90px;line-height:1.6;}
+.sel-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.sel-btn{padding:12px 8px;border-radius:var(--r);font-size:13px;font-family:inherit;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);text-align:center;transition:all 0.15s;line-height:1.4;-webkit-tap-highlight-color:transparent;}
+.sel-btn.selected{background:var(--teal-l);border-color:var(--teal-b);color:var(--teal-d);font-weight:500;}
+.sel-btn.sonota.selected{background:var(--purple-l);border-color:var(--purple-b);color:var(--purple);}
+.sonota-box{margin-top:8px;display:none;}
+.sonota-box.show{display:block;animation:fadeIn 0.15s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+.body-map{position:relative;width:160px;height:280px;margin:0 auto 12px;}
+.selected-parts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:28px;}
+.part-tag{font-size:12px;padding:4px 12px;border-radius:var(--rp);background:var(--teal-l);color:var(--teal-d);border:1px solid var(--teal-b);display:flex;align-items:center;gap:5px;}
+.part-tag button{background:none;border:none;cursor:pointer;color:var(--teal-d);font-size:14px;padding:0;line-height:1;}
+.slider-row{display:flex;align-items:center;gap:12px;}
+.slider-row input[type=range]{flex:1;accent-color:var(--teal);}
+.slider-val{font-size:18px;font-weight:700;min-width:36px;text-align:right;}
+.pain-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px;}
+.nav-btns{display:flex;gap:10px;margin-top:24px;}
+.btn-back{flex:1;padding:14px;border-radius:var(--r);font-size:15px;font-family:inherit;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);}
+.btn-next{flex:2;padding:14px;border-radius:var(--r);font-size:15px;font-family:inherit;font-weight:700;cursor:pointer;border:none;background:var(--teal);color:#fff;-webkit-tap-highlight-color:transparent;}
+.btn-next:active{transform:scale(0.98);}
+.confirm-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;}
+.confirm-section{margin-bottom:12px;}
+.confirm-sec-title{font-size:11px;font-weight:500;color:var(--teal-d);background:var(--teal-l);padding:3px 10px;border-radius:6px;display:inline-block;margin-bottom:8px;}
+.confirm-row{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.confirm-row:last-child{border-bottom:none;}
+.confirm-key{color:var(--muted);min-width:80px;flex-shrink:0;}
+.confirm-val{color:var(--text);flex:1;}
+.complete-wrap{text-align:center;padding:3rem 1rem;}
+.complete-icon{width:72px;height:72px;border-radius:50%;background:var(--teal-l);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;}
+.complete-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.complete-sub{font-size:13px;color:var(--muted);line-height:1.8;}
+.sync-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 16px;border-radius:var(--rp);background:var(--teal-l);border:1px solid var(--teal-b);color:var(--teal-d);margin-top:16px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>○○整骨院　問診票</h1>
+  <p>ご予約ありがとうございます。来院前にご記入ください。</p>
+</header>
+<div class="container">
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:14%"></div></div>
+  <div class="step-counter" id="step-counter">ステップ 1 / 7</div>
+
+  <!-- STEP 1 -->
+  <div class="step active" id="step-1">
+    <div class="step-label">基本情報</div>
+    <div class="step-title">お名前・連絡先を<br>教えてください</div>
+    <div class="field"><label class="field-label">お名前（本名）<span class="req">*</span></label><input type="text" id="f-name" placeholder="例：山田 花子" /></div>
+    <div class="field"><label class="field-label">電話番号<span class="req">*</span></label><input type="tel" id="f-tel" placeholder="例：090-1234-5678" /></div>
+    <div class="field"><label class="field-label">メールアドレス</label><input type="email" id="f-email" placeholder="例：hanako@example.com" /></div>
+    <div class="field"><label class="field-label">ご住所</label><input type="text" id="f-address" placeholder="例：大阪府大阪市北区〇〇1-2-3" /></div>
+    <div class="nav-btns"><button class="btn-next" onclick="nextStep()">次へ →</button></div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" id="step-2">
+    <div class="step-label">症状の部位</div>
+    <div class="step-title">痛みや不調のある部位を<br>タップしてください</div>
+    <div class="field">
+      <label class="field-label">複数選択できます<span class="req">*</span></label>
+      <div class="body-map">
+        <svg viewBox="0 0 160 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+          <ellipse cx="80" cy="28" rx="22" ry="22" fill="#f0efe9" stroke="#ccc" stroke-width="1"/>
+          <rect x="58" y="52" width="44" height="65" rx="8" fill="#f0efe9" stroke="#ccc" stroke-width="1"/>
+          <rect x="32" y="55" width="26" height="55" rx="8" fill="#f0efe9" stroke="#ccc" stroke-width="1"/>
+          <rect x="102" y="55" width="26" height="55" rx="8" fill="#f0efe9" stroke="#ccc" stroke-width="1"/>
+          <rect x="60" y="117" width="18" height="70" rx="8" fill="#f0efe9" stroke="#ccc" stroke-width="1"/>
+          <rect x="82" y="117" width="18" height="70" rx="8" fill="#f0efe9" stroke="#ccc" stroke-width="1"/>
+          <rect x="55" y="188" width="18" height="60" rx="8" fill="#f0efe9" stroke="#ccc" stroke-width="1"/>
+          <rect x="87" y="188" width="18" height="60" rx="8" fill="#f0efe9" stroke="#ccc" stroke-width="1"/>
+          <g class="bp" data-part="頭・首" onclick="tp('頭・首')" style="cursor:pointer;"><circle cx="80" cy="28" r="18" fill="transparent" stroke="#ccc" stroke-width="1.5" id="bpc-頭首"/><text x="80" y="32" font-size="9" fill="#888" text-anchor="middle" id="bpt-頭首">頭・首</text></g>
+          <g class="bp" data-part="左肩" onclick="tp('左肩')" style="cursor:pointer;"><circle cx="36" cy="62" r="14" fill="transparent" stroke="#ccc" stroke-width="1.5" id="bpc-左肩"/><text x="36" y="66" font-size="9" fill="#888" text-anchor="middle" id="bpt-左肩">左肩</text></g>
+          <g class="bp" data-part="右肩" onclick="tp('右肩')" style="cursor:pointer;"><circle cx="124" cy="62" r="14" fill="transparent" stroke="#ccc" stroke-width="1.5" id="bpc-右肩"/><text x="124" y="66" font-size="9" fill="#888" text-anchor="middle" id="bpt-右肩">右肩</text></g>
+          <g class="bp" data-part="背中・腰" onclick="tp('背中・腰')" style="cursor:pointer;"><circle cx="80" cy="90" r="18" fill="transparent" stroke="#ccc" stroke-width="1.5" id="bpc-背中腰"/><text x="80" y="94" font-size="9" fill="#888" text-anchor="middle" id="bpt-背中腰">背中・腰</text></g>
+          <g class="bp" data-part="左腕" onclick="tp('左腕')" style="cursor:pointer;"><circle cx="36" cy="95" r="14" fill="transparent" stroke="#ccc" stroke-width="1.5" id="bpc-左腕"/><text x="36" y="99" font-size="9" fill="#888" text-anchor="middle" id="bpt-左腕">左腕</text></g>
+          <g class="bp" data-part="右腕" onclick="tp('右腕')" style="cursor:pointer;"><circle cx="124" cy="95" r="14" fill="transparent" stroke="#ccc" stroke-width="1.5" id="bpc-右腕"/><text x="124" y="99" font-size="9" fill="#888" text-anchor="middle" id="bpt-右腕">右腕</text></g>
+          <g class="bp" data-part="股関節・お尻" onclick="tp('股関節・お尻')" style="cursor:pointer;"><circle cx="80" cy="130" r="18" fill="transparent" stroke="#ccc" stroke-width="1.5" id="bpc-股関節"/><text x="80" y="134" font-size="9" fill="#888" text-anchor="middle" id="bpt-股関節">股関節</text></g>
+          <g class="bp" data-part="左膝" onclick="tp('左膝')" style="cursor:pointer;"><circle cx="64" cy="170" r="14" fill="transparent" stroke="#ccc" stroke-width="1.5" id="bpc-左膝"/><text x="64" y="174" font-size="9" fill="#888" text-anchor="middle" id="bpt-左膝">左膝</text></g>
+          <g class="bp" data-part="右膝" onclick="tp('右膝')" style="cursor:pointer;"><circle cx="96" cy="170" r="14" fill="transparent" stroke="#ccc" stroke-width="1.5" id="bpc-右膝"/><text x="96" y="174" font-size="9" fill="#888" text-anchor="middle" id="bpt-右膝">右膝</text></g>
+          <g class="bp" data-part="左足首・足" onclick="tp('左足首・足')" style="cursor:pointer;"><circle cx="60" cy="225" r="14" fill="transparent" stroke="#ccc" stroke-width="1.5" id="bpc-左足"/><text x="60" y="229" font-size="9" fill="#888" text-anchor="middle" id="bpt-左足">左足</text></g>
+          <g class="bp" data-part="右足首・足" onclick="tp('右足首・足')" style="cursor:pointer;"><circle cx="100" cy="225" r="14" fill="transparent" stroke="#ccc" stroke-width="1.5" id="bpc-右足"/><text x="100" y="229" font-size="9" fill="#888" text-anchor="middle" id="bpt-右足">右足</text></g>
+        </svg>
+      </div>
+      <div class="selected-parts" id="selected-parts"><span style="font-size:12px;color:var(--muted);">タップして選択してください</span></div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="prevStep()">← 戻る</button>
+      <button class="btn-next" onclick="nextStep()">次へ →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step" id="step-3">
+    <div class="step-label">症状の詳細</div>
+    <div class="step-title">痛みについて<br>教えてください</div>
+    <div class="field">
+      <label class="field-label">現在の痛みレベル<span class="req">*</span></label>
+      <div class="slider-row">
+        <span style="font-size:12px;color:var(--muted);">なし</span>
+        <input type="range" min="0" max="10" value="5" step="1" id="pain-sl" oninput="document.getElementById('pain-val').textContent=this.value" />
+        <span class="slider-val" id="pain-val">5</span><span style="font-size:13px;color:var(--muted);">/10</span>
+      </div>
+      <div class="pain-labels"><span>0</span><span>最大の痛み　10</span></div>
+    </div>
+    <div class="field">
+      <label class="field-label">いつから？<span class="req">*</span></label>
+      <div class="sel-grid">
+        <button class="sel-btn" onclick="s1(this,'when')">1週間以内</button>
+        <button class="sel-btn" onclick="s1(this,'when')">1ヶ月以内</button>
+        <button class="sel-btn" onclick="s1(this,'when')">3ヶ月以内</button>
+        <button class="sel-btn" onclick="s1(this,'when')">半年以上</button>
+        <button class="sel-btn" onclick="s1(this,'when')">1年以上</button>
+        <button class="sel-btn sonota" onclick="s1s(this,'when','when-s')">その他</button>
+      </div>
+      <div class="sonota-box" id="when-s"><textarea placeholder="詳しく教えてください" style="min-height:60px;"></textarea></div>
+    </div>
+    <div class="field">
+      <label class="field-label">どんな時に痛みますか？（複数可）</label>
+      <div class="sel-grid">
+        <button class="sel-btn" onclick="sm(this,'wpain')">歩いている時</button>
+        <button class="sel-btn" onclick="sm(this,'wpain')">座っている時</button>
+        <button class="sel-btn" onclick="sm(this,'wpain')">寝ている時</button>
+        <button class="sel-btn" onclick="sm(this,'wpain')">起き上がる時</button>
+        <button class="sel-btn" onclick="sm(this,'wpain')">運動している時</button>
+        <button class="sel-btn" onclick="sm(this,'wpain')">常にある</button>
+        <button class="sel-btn sonota" onclick="sms(this,'wpain','wpain-s')">その他</button>
+      </div>
+      <div class="sonota-box" id="wpain-s"><textarea placeholder="詳しく教えてください" style="min-height:60px;"></textarea></div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="prevStep()">← 戻る</button>
+      <button class="btn-next" onclick="nextStep()">次へ →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step" id="step-4">
+    <div class="step-label">怪我・通院歴</div>
+    <div class="step-title">過去の怪我や通院について<br>教えてください</div>
+    <div class="field"><label class="field-label">過去の怪我（覚えている限り）</label><textarea id="f-injury" placeholder="例：30代の頃に交通事故で腰を痛めた、20代に左足首を捻挫した など。なければ「なし」と記入"></textarea></div>
+    <div class="field"><label class="field-label">これまでの通院歴</label><textarea id="f-hosp" placeholder="例：3年前に整形外科に通院（半年）、去年整骨院に月2回 など"></textarea></div>
+    <div class="field">
+      <label class="field-label">現在通院中の医療機関</label>
+      <div class="sel-grid">
+        <button class="sel-btn" onclick="s1(this,'now-hosp')">ある</button>
+        <button class="sel-btn" onclick="s1(this,'now-hosp')">ない</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">既往歴・服薬中の薬（複数可）</label>
+      <div class="sel-grid">
+        <button class="sel-btn" onclick="sm(this,'med')">高血圧の薬</button>
+        <button class="sel-btn" onclick="sm(this,'med')">糖尿病の薬</button>
+        <button class="sel-btn" onclick="sm(this,'med')">骨粗しょう症</button>
+        <button class="sel-btn" onclick="sm(this,'med')">手術歴あり</button>
+        <button class="sel-btn" onclick="sm(this,'med')">特になし</button>
+        <button class="sel-btn sonota" onclick="sms(this,'med','med-s')">その他</button>
+      </div>
+      <div class="sonota-box" id="med-s"><textarea placeholder="薬の名前や詳細を教えてください" style="min-height:60px;"></textarea></div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="prevStep()">← 戻る</button>
+      <button class="btn-next" onclick="nextStep()">次へ →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step" id="step-5">
+    <div class="step-label">生活習慣</div>
+    <div class="step-title">日常生活について<br>教えてください</div>
+    <div class="field">
+      <label class="field-label">お仕事の種類<span class="req">*</span></label>
+      <div class="sel-grid">
+        <button class="sel-btn" onclick="s1(this,'job')">デスクワーク</button>
+        <button class="sel-btn" onclick="s1(this,'job')">立ち仕事</button>
+        <button class="sel-btn" onclick="s1(this,'job')">体を使う仕事</button>
+        <button class="sel-btn" onclick="s1(this,'job')">運転が多い</button>
+        <button class="sel-btn" onclick="s1(this,'job')">在宅ワーク</button>
+        <button class="sel-btn" onclick="s1(this,'job')">退職・主婦</button>
+        <button class="sel-btn sonota" onclick="s1s(this,'job','job-s')">その他</button>
+      </div>
+      <div class="sonota-box" id="job-s"><textarea placeholder="お仕事の内容を教えてください" style="min-height:60px;"></textarea></div>
+    </div>
+    <div class="field">
+      <label class="field-label">1日の座っている時間</label>
+      <div class="sel-grid">
+        <button class="sel-btn" onclick="s1(this,'sit')">2時間未満</button>
+        <button class="sel-btn" onclick="s1(this,'sit')">2〜4時間</button>
+        <button class="sel-btn" onclick="s1(this,'sit')">4〜6時間</button>
+        <button class="sel-btn" onclick="s1(this,'sit')">6時間以上</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">睡眠の質</label>
+      <div class="sel-grid">
+        <button class="sel-btn" onclick="s1(this,'sleep')">よく眠れている</button>
+        <button class="sel-btn" onclick="s1(this,'sleep')">やや浅い</button>
+        <button class="sel-btn" onclick="s1(this,'sleep')">眠れていない</button>
+        <button class="sel-btn" onclick="s1(this,'sleep')">痛みで起きる</button>
+        <button class="sel-btn sonota" onclick="s1s(this,'sleep','sleep-s')">その他</button>
+      </div>
+      <div class="sonota-box" id="sleep-s"><textarea placeholder="詳しく教えてください" style="min-height:60px;"></textarea></div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="prevStep()">← 戻る</button>
+      <button class="btn-next" onclick="nextStep()">次へ →</button>
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step" id="step-6">
+    <div class="step-label">運動歴</div>
+    <div class="step-title">運動の習慣について<br>教えてください</div>
+    <div class="field">
+      <label class="field-label">現在やっている運動（複数可）</label>
+      <div class="sel-grid">
+        <button class="sel-btn" onclick="sm(this,'snow')">ウォーキング</button>
+        <button class="sel-btn" onclick="sm(this,'snow')">水泳</button>
+        <button class="sel-btn" onclick="sm(this,'snow')">ゴルフ</button>
+        <button class="sel-btn" onclick="sm(this,'snow')">テニス</button>
+        <button class="sel-btn" onclick="sm(this,'snow')">筋トレ</button>
+        <button class="sel-btn" onclick="sm(this,'snow')">ヨガ・体操</button>
+        <button class="sel-btn" onclick="sm(this,'snow')">自転車</button>
+        <button class="sel-btn" onclick="sm(this,'snow')">していない</button>
+        <button class="sel-btn sonota" onclick="sms(this,'snow','snow-s')">その他</button>
+      </div>
+      <div class="sonota-box" id="snow-s"><textarea placeholder="どんな運動か教えてください" style="min-height:60px;"></textarea></div>
+    </div>
+    <div class="field"><label class="field-label">過去にやっていた運動・スポーツ</label><textarea id="f-spast" placeholder="例：若い頃にテニスを10年、40代までマラソンをしていた など"></textarea></div>
+    <div class="field">
+      <label class="field-label">現在の運動頻度</label>
+      <div class="sel-grid">
+        <button class="sel-btn" onclick="s1(this,'freq')">ほぼ毎日</button>
+        <button class="sel-btn" onclick="s1(this,'freq')">週3〜4回</button>
+        <button class="sel-btn" onclick="s1(this,'freq')">週1〜2回</button>
+        <button class="sel-btn" onclick="s1(this,'freq')">月数回</button>
+        <button class="sel-btn" onclick="s1(this,'freq')">していない</button>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="prevStep()">← 戻る</button>
+      <button class="btn-next" onclick="nextStep()">次へ →</button>
+    </div>
+  </div>
+
+  <!-- STEP 7 -->
+  <div class="step" id="step-7">
+    <div class="step-label">ゴール</div>
+    <div class="step-title">治ったら、何をしたいですか？</div>
+    <div class="field"><label class="field-label">達成したいゴール<span class="req">*</span></label><textarea id="f-goal" placeholder="例：また旅行に行きたい、テニスを再開したい、孫と一緒に走り回りたい など具体的に" style="min-height:100px;"></textarea></div>
+    <div class="field">
+      <label class="field-label">いつまでに達成したいですか？</label>
+      <div class="sel-grid">
+        <button class="sel-btn" onclick="s1(this,'dead')">1ヶ月以内</button>
+        <button class="sel-btn" onclick="s1(this,'dead')">3ヶ月以内</button>
+        <button class="sel-btn" onclick="s1(this,'dead')">半年以内</button>
+        <button class="sel-btn" onclick="s1(this,'dead')">1年以内</button>
+        <button class="sel-btn" onclick="s1(this,'dead')">特に決めていない</button>
+        <button class="sel-btn sonota" onclick="s1s(this,'dead','dead-s')">その他</button>
+      </div>
+      <div class="sonota-box" id="dead-s"><textarea placeholder="詳しく教えてください" style="min-height:60px;"></textarea></div>
+    </div>
+    <div class="field"><label class="field-label">他に気になること・先生に伝えたいこと</label><textarea id="f-memo" placeholder="例：妊娠中、アレルギーがある、手術歴がある など"></textarea></div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="prevStep()">← 戻る</button>
+      <button class="btn-next" onclick="nextStep()">確認する →</button>
+    </div>
+  </div>
+
+  <!-- STEP 8: 確認 -->
+  <div class="step" id="step-8">
+    <div class="step-label">確認・送信</div>
+    <div class="step-title">内容を確認して<br>送信してください</div>
+    <div id="confirm-content"></div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="prevStep()">← 修正する</button>
+      <button class="btn-next" onclick="submitForm()" id="submit-btn">送信する ✓</button>
+    </div>
+  </div>
+
+  <!-- 完了 -->
+  <div class="step" id="step-complete">
+    <div class="complete-wrap">
+      <div class="complete-icon">✓</div>
+      <div class="complete-title">問診票を送信しました</div>
+      <div class="complete-sub">ご記入ありがとうございます。<br>来院時に担当の先生が内容を確認します。<br><br>このページは閉じていただいて大丈夫です。</div>
+      <div class="sync-badge">☁ 担当の先生に自動で通知されました</div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBfi9eyu8RXy7kl1UAujkDnXkIhLzxScf0",
+  authDomain: "kansatsu-tool.firebaseapp.com",
+  projectId: "kansatsu-tool",
+  storageBucket: "kansatsu-tool.firebasestorage.app",
+  messagingSenderId: "357129370344",
+  appId: "1:357129370344:web:03aa0cfca3495aa8cf675d"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const monshinCol = collection(db, "monshin");
+
+let currentStep = 1;
+const totalSteps = 8;
+const selectedParts = new Set();
+
+function updateProgress() {
+  document.getElementById('progress').style.width = ((currentStep-1) / totalSteps * 100) + '%';
+  document.getElementById('step-counter').textContent = `ステップ ${currentStep} / ${totalSteps}`;
+}
+
+window.nextStep = () => {
+  document.getElementById(`step-${currentStep}`).classList.remove('active');
+  currentStep++;
+  if (currentStep === totalSteps) buildConfirm();
+  document.getElementById(`step-${currentStep}`).classList.add('active');
+  updateProgress();
+  window.scrollTo(0, 0);
+};
+
+window.prevStep = () => {
+  document.getElementById(`step-${currentStep}`).classList.remove('active');
+  currentStep--;
+  document.getElementById(`step-${currentStep}`).classList.add('active');
+  updateProgress();
+  window.scrollTo(0, 0);
+};
+
+window.tp = (part) => {
+  const ids = { '頭・首':'頭首','左肩':'左肩','右肩':'右肩','背中・腰':'背中腰','左腕':'左腕','右腕':'右腕','股関節・お尻':'股関節','左膝':'左膝','右膝':'右膝','左足首・足':'左足','右足首・足':'右足' };
+  const id = ids[part];
+  if (selectedParts.has(part)) {
+    selectedParts.delete(part);
+    document.getElementById('bpc-'+id).setAttribute('fill','transparent');
+    document.getElementById('bpc-'+id).setAttribute('stroke','#ccc');
+    document.getElementById('bpt-'+id).setAttribute('fill','#888');
+  } else {
+    selectedParts.add(part);
+    document.getElementById('bpc-'+id).setAttribute('fill','#E1F5EE');
+    document.getElementById('bpc-'+id).setAttribute('stroke','#1D9E75');
+    document.getElementById('bpt-'+id).setAttribute('fill','#085041');
+  }
+  const c = document.getElementById('selected-parts');
+  if (!selectedParts.size) { c.innerHTML = '<span style="font-size:12px;color:#888;">タップして選択してください</span>'; return; }
+  c.innerHTML = [...selectedParts].map(p => `<span class="part-tag">${p}<button onclick="tp('${p}')" aria-label="${p}を削除">×</button></span>`).join('');
+};
+
+window.s1 = (btn, group) => {
+  document.querySelectorAll(`[data-g="${group}"]`).forEach(b => b.classList.remove('selected'));
+  btn.dataset.g = group;
+  btn.classList.add('selected');
+};
+
+window.s1s = (btn, group, sid) => {
+  s1(btn, group);
+  const box = document.getElementById(sid);
+  box.classList.toggle('show', btn.classList.contains('selected'));
+};
+
+window.sm = (btn, group) => {
+  btn.dataset.g = group;
+  btn.classList.toggle('selected');
+};
+
+window.sms = (btn, group, sid) => {
+  sm(btn, group);
+  const box = document.getElementById(sid);
+  box.classList.toggle('show', btn.classList.contains('selected'));
+};
+
+function gv1(group) {
+  const el = document.querySelector(`[data-g="${group}"].selected`);
+  if (!el) return '';
+  if (el.classList.contains('sonota')) {
+    const ta = el.closest('.field')?.querySelector('.sonota-box.show textarea');
+    return ta?.value ? 'その他：' + ta.value : 'その他';
+  }
+  return el.textContent.trim();
+}
+
+function gvm(group) {
+  return [...document.querySelectorAll(`[data-g="${group}"].selected`)].map(el => {
+    if (el.classList.contains('sonota')) {
+      const ta = el.closest('.field')?.querySelector('.sonota-box.show textarea');
+      return ta?.value ? 'その他：' + ta.value : 'その他';
+    }
+    return el.textContent.trim();
+  }).join('、') || 'なし';
+}
+
+function buildConfirm() {
+  const sections = [
+    { title: '個人情報', rows: [
+      ['お名前', document.getElementById('f-name').value],
+      ['電話番号', document.getElementById('f-tel').value],
+      ['メール', document.getElementById('f-email').value || 'なし'],
+      ['住所', document.getElementById('f-address').value || 'なし'],
+    ]},
+    { title: '症状', rows: [
+      ['痛みの部位', [...selectedParts].join('、') || '未選択'],
+      ['痛みレベル', document.getElementById('pain-val').textContent + '/10'],
+      ['いつから', gv1('when') || '未選択'],
+      ['痛む場面', gvm('wpain')],
+    ]},
+    { title: '怪我・通院', rows: [
+      ['怪我歴', document.getElementById('f-injury').value || 'なし'],
+      ['通院歴', document.getElementById('f-hosp').value || 'なし'],
+      ['現在通院中', gv1('now-hosp') || '未選択'],
+      ['既往・服薬', gvm('med')],
+    ]},
+    { title: '生活・運動', rows: [
+      ['職業', gv1('job') || '未選択'],
+      ['座っている時間', gv1('sit') || '未選択'],
+      ['睡眠の質', gv1('sleep') || '未選択'],
+      ['現在の運動', gvm('snow')],
+      ['過去の運動', document.getElementById('f-spast').value || 'なし'],
+      ['運動頻度', gv1('freq') || '未選択'],
+    ]},
+    { title: 'ゴール', rows: [
+      ['ゴール', document.getElementById('f-goal').value || '未入力'],
+      ['達成時期', gv1('dead') || '未選択'],
+      ['その他メモ', document.getElementById('f-memo').value || 'なし'],
+    ]},
+  ];
+  document.getElementById('confirm-content').innerHTML = sections.map(s => `
+    <div class="confirm-card">
+      <div class="confirm-section">
+        <div class="confirm-sec-title">${s.title}</div>
+        ${s.rows.map(([k,v]) => `<div class="confirm-row"><span class="confirm-key">${k}</span><span class="confirm-val">${v}</span></div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+window.submitForm = async () => {
+  const btn = document.getElementById('submit-btn');
+  btn.textContent = '送信中...';
+  btn.disabled = true;
+  const formData = {
+    date: new Date().toISOString().slice(0,10),
+    status: 'new',
+    name: document.getElementById('f-name').value,
+    tel: document.getElementById('f-tel').value,
+    email: document.getElementById('f-email').value,
+    address: document.getElementById('f-address').value,
+    parts: [...selectedParts],
+    pain: parseInt(document.getElementById('pain-sl').value),
+    when: gv1('when'),
+    whenPain: gvm('wpain'),
+    injury: document.getElementById('f-injury').value,
+    hospital: document.getElementById('f-hosp').value,
+    nowHospital: gv1('now-hosp'),
+    med: gvm('med'),
+    job: gv1('job'),
+    sit: gv1('sit'),
+    sleep: gv1('sleep'),
+    sportNow: gvm('snow'),
+    sportPast: document.getElementById('f-spast').value,
+    freq: gv1('freq'),
+    goal: document.getElementById('f-goal').value,
+    deadline: gv1('dead'),
+    memo: document.getElementById('f-memo').value,
+    keikaAdded: false,
+    sensei: '',
+  };
+  try {
+    await addDoc(monshinCol, formData);
+  } catch(e) { console.error(e); }
+  document.getElementById(`step-${currentStep}`).classList.remove('active');
+  document.getElementById('step-complete').classList.add('active');
+  document.getElementById('progress').style.width = '100%';
+  document.getElementById('step-counter').textContent = '送信完了';
+};
+</script>
+</body>
+</html>

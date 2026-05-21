@@ -75,6 +75,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.6;}
 <header>
   <h1>○○整骨院　問診票</h1>
   <p>ご予約ありがとうございます。来院前にご記入ください。</p>
+  <p id="clinic-label" style="font-size:10px;color:#9FE1CB;margin-top:2px;"></p>
 </header>
 <div class="container">
   <div class="progress-bar"><div class="progress-fill" id="progress" style="width:14%"></div></div>
@@ -343,6 +344,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const monshinCol = collection(db, "monshin");
+const CLINIC_ID = new URLSearchParams(window.location.search).get('clinic') || 'clinic_001';
+document.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('clinic-label');
+  if (el) el.textContent = CLINIC_ID;
+});
 
 let currentStep = 1;
 const totalSteps = 8;
@@ -505,6 +511,7 @@ window.submitForm = async () => {
     memo: document.getElementById('f-memo').value,
     keikaAdded: false,
     sensei: '',
+    clinicId: CLINIC_ID,
   };
   try {
     await addDoc(monshinCol, formData);
